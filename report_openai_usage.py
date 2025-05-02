@@ -1,13 +1,11 @@
 import os
 import datetime
 import requests
-from slack_sdk import WebClient
+import json
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
-SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
-SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL", "#general")
 
-# Dates
+# Date range: past 7 days
 end_date = datetime.date.today()
 start_date = end_date - datetime.timedelta(days=7)
 
@@ -26,9 +24,11 @@ def get_usage(start_date, end_date):
     return usage_dollars
 
 def post_to_slack(message):
-    client = WebClient(token=SLACK_BOT_TOKEN)
-    response = client.chat_postMessage(channel=SLACK_CHANNEL, text=message)
-    assert response["ok"]
+    payload = {
+        "text": message
+    }
+    response = requests.post(SLACK_WEBHOOK_URL, data=json.dumps(payload), headers={"Content-Type": "application/json"})
+    response.raise_for_status()
 
 def main():
     usage = get_usage(start_date, end_date)
