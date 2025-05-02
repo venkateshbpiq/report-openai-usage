@@ -1,0 +1,27 @@
+name: Weekly OpenAI Usage Report
+
+on:
+  schedule:
+    - cron: '0 14 * * 1'  # Every Monday at 14:00 UTC
+  workflow_dispatch:      # Allows manual triggering
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run usage reporter
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL: "#your-channel"  # Or use another secret if you want
+        run: python report_openai_usage.py
